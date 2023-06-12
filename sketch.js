@@ -1,41 +1,49 @@
+// defining grid agent moves through
 let cols, rows;
 let w = 15;
 let grid = [];
-
+// list of locations finder agent has moved through
 let stack = [];
-
+// List of shapes as defined by stack once agent has reached no available neighbors
 let shapes = [];
-
+// sets current position of finder
 let current;
 
 function setup() {
   createCanvas(600, 600);
+  // making grid
   cols = floor(width / w);
   rows = floor(height / w);
   // frameRate(35);
 
+  // fills grid with cells that have location properties, visited toggle, list of available neighbors
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
       let cell = new Cell(i, j);
       grid.push(cell);
     }
   }
+  // starting position top right corner
   current = grid[0];
 }
 
 function draw() {
   background(51);
-  for (let i = 0; i < grid.length; i++) {
-    // grid[i].show();
-  }
-
+  // if a stack has been filled & a new shape obj created, show it
   if (shapes.length > 0){
     for (let i = 0; i < shapes.length; i++){
       shapes[i].show();
     }
   }
 
+  // if it's still actively looking for spots, show where it's going
+  if (stack.length > 0){
+    current.highlight();
+  }
+
+  // for every cycle, marked that the current location has been visited
   current.visited = true;
+  // see if there's an available neighbor for the agent to move to; if it can, mark that the next index has been visited, push the current location to the stack, and set the next value as current for the next cycle
   let next = current.checkNeighbors();
   if (next) {
     next.visited = true;
@@ -45,6 +53,7 @@ function draw() {
     current = next;
     // } else if (stack.length > 0) {
   } else {
+    // if the agent can no longer move anywhere, push current to stack, create new shape obj with values from stack & push it to shapes, reset the stack, set a new starting location at an unvisited location
     stack.push(current);
     let newshape = new shapeify();
     shapes.push(newshape);
@@ -59,10 +68,13 @@ function draw() {
 }
 
 function shapeify() {
+  // make new list that will copy the values from the global stack
   this.shapestack = [];
   for (let i = 0; i < stack.length; i++){
     this.shapestack[i] = stack[i];
   }
+
+  // I'll be trying to figure out how to find the outer parameters of what's been visited here, to draw an outline. right now this does nothing and isn't called in draw()
   this.showShape = function() {
     stroke(0, 255, 0);
     beginShape();
@@ -81,8 +93,10 @@ function shapeify() {
     
   }
 
+  // Set a random radius for the circles on a by-object basis to give variation
   this.r = random(2, 15);
 
+  // draw a circle in the center of the square for each index in shapestack
   this.show = function(){
     noStroke();
     fill(0, 255, 0);
@@ -94,6 +108,7 @@ function shapeify() {
   }
 }
 
+// finds the index of grid squares in relation to current square, given that they are within bounds 
 function index(i, j) {
   if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
     return -1;
@@ -104,7 +119,6 @@ function index(i, j) {
 function Cell(i, j) {
   this.i = i;
   this.j = j;
-  this.walls = [true, true, true, true];
   this.visited = false;
   // Top, right, bottom, left
   this.checkNeighbors = function () {
@@ -139,34 +153,7 @@ function Cell(i, j) {
     var x = this.i * w;
     var y = this.j * w;
     noStroke();
-    fill(0, 0, 255, 100);
+    fill(0, 0, 255);
     rect(x, y, w, w);
   }
-
-  this.show = function () {
-    let x = this.i * w;
-    let y = this.j * w;
-    stroke(255);
-    if (this.walls[0]) {
-      line(x, y, x + w, y);
-    }
-    if (this.walls[1]) {
-      line(x + w, y, x + w, y + w);
-    }
-    if (this.walls[2]) {
-      line(x + w, y + w, x, y + w);
-    }
-    if (this.walls[3]) {
-      line(x, y + w, x, y);
-    }
-
-    if (this.visited) {
-      noStroke();
-      fill(0, 255, 0, 100);
-      rect(x, y, w, w);
-    }
-  }
-
-
-
 }
