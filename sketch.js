@@ -16,7 +16,7 @@ let currentColor;
 let colors = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(windowWidth, windowHeight);
   // making grid
   cols = floor(width / w);
   rows = floor(height / w);
