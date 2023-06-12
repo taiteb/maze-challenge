@@ -1,8 +1,10 @@
 let cols, rows;
-let w = 40;
+let w = 15;
 let grid = [];
 
 let stack = [];
+
+let shapes = [];
 
 let current;
 
@@ -10,7 +12,7 @@ function setup() {
   createCanvas(600, 600);
   cols = floor(width / w);
   rows = floor(height / w);
-  frameRate(5);
+  // frameRate(35);
 
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
@@ -24,48 +26,79 @@ function setup() {
 function draw() {
   background(51);
   for (let i = 0; i < grid.length; i++) {
-    grid[i].show();
+    // grid[i].show();
+  }
+
+  if (shapes.length > 0){
+    for (let i = 0; i < shapes.length; i++){
+      shapes[i].show();
+    }
   }
 
   current.visited = true;
-  current.highlight();
   let next = current.checkNeighbors();
-  if (next){
+  if (next) {
     next.visited = true;
 
     stack.push(current);
 
-    removeWalls(current, next);
     current = next;
-  } else if (stack.length > 0) {
-    current = stack.pop();
+    // } else if (stack.length > 0) {
+  } else {
+    stack.push(current);
+    let newshape = new shapeify();
+    shapes.push(newshape);
+    // console.log(shapes[0]);
+    stack = [];
+    for (let i = 0; i < grid.length; i++){
+      if (!grid[i].visited){
+        current = grid[i];
+      }
+    }
   }
 }
 
-function index(i, j){
-  if (i < 0 || j < 0 || i > cols-1 || j > rows-1){
+function shapeify() {
+  this.shapestack = [];
+  for (let i = 0; i < stack.length; i++){
+    this.shapestack[i] = stack[i];
+  }
+  this.showShape = function() {
+    stroke(0, 255, 0);
+    beginShape();
+    
+    for (let i = 0; i < this.shapestack.length; i++) {
+      var x = this.shapestack[i].i * w;
+      var y = this.shapestack[i].j * w;
+      vertex(x, y);
+    }
+    for (let i = 0; i < this.shapestack.length; i++){
+      var x = (this.shapestack[i].i * w) - w;
+      var y = (this.shapestack[i].j * w) - w;
+      vertex(x,y);
+    }
+    endShape();
+    
+  }
+
+  this.r = random(2, 15);
+
+  this.show = function(){
+    noStroke();
+    fill(0, 255, 0);
+    for (i = 0; i < this.shapestack.length; i++){
+      var x = this.shapestack[i].i * w;
+      var y = this.shapestack[i].j * w;
+      circle(x + (w/2), y + (w/2), this.r);
+    }
+  }
+}
+
+function index(i, j) {
+  if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
     return -1;
   }
   return i + j * cols;
-}
-
-function removeWalls(a, b){
-  let x = a.i - b.i;
-  if (x === 1){
-    a.walls[3] = false;
-    b.walls[1] = false;
-  } else if (x === -1){
-    a.walls[1] = false;
-    b.walls[3] = false;
-  }
-  let y = a.j - b.j;
-  if (y === 1){
-    a.walls[0] = false;
-    b.walls[2] = false;
-  } else if (y === -1){
-    a.walls[2] = false;
-    b.walls[0] = false;
-  }
 }
 
 function Cell(i, j) {
@@ -76,25 +109,25 @@ function Cell(i, j) {
   // Top, right, bottom, left
   this.checkNeighbors = function () {
     let neighbors = [];
-    let top = grid[index(i, j-1)];
-    let right = grid[index(i+1, j)];
-    let bottom = grid[index(i, j+1)];
-    let left = grid[index(i-1, j)];
+    let top = grid[index(i, j - 1)];
+    let right = grid[index(i + 1, j)];
+    let bottom = grid[index(i, j + 1)];
+    let left = grid[index(i - 1, j)];
 
-    if (top && !top.visited){
+    if (top && !top.visited) {
       neighbors.push(top);
     }
-    if (right && !right.visited){
+    if (right && !right.visited) {
       neighbors.push(right);
     }
-    if (bottom && !bottom.visited){
+    if (bottom && !bottom.visited) {
       neighbors.push(bottom);
     }
-    if (left && !left.visited){
+    if (left && !left.visited) {
       neighbors.push(left);
     }
 
-    if(neighbors.length > 0){
+    if (neighbors.length > 0) {
       let r = floor(random(0, neighbors.length));
       return neighbors[r];
     } else {
@@ -102,11 +135,11 @@ function Cell(i, j) {
     }
   }
 
-  this.highlight = function(){
-    var x = this.i*w;
-    var y = this.j*w;
+  this.highlight = function () {
+    var x = this.i * w;
+    var y = this.j * w;
     noStroke();
-    fill(0,0,255,100);
+    fill(0, 0, 255, 100);
     rect(x, y, w, w);
   }
 
@@ -129,7 +162,7 @@ function Cell(i, j) {
 
     if (this.visited) {
       noStroke();
-      fill(255, 0, 255, 100);
+      fill(0, 255, 0, 100);
       rect(x, y, w, w);
     }
   }
