@@ -9,6 +9,12 @@ let shapes = [];
 // sets current position of finder
 let current;
 
+// color terms
+let colorIndex = 0;
+let targetColor;
+let currentColor;
+let colors = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+
 function setup() {
   createCanvas(600, 600);
   // making grid
@@ -25,14 +31,27 @@ function setup() {
   }
   // starting position top right corner
   current = grid[0];
+
+  // Filling color list
+  for (let i = 0; i < colors.length; i++){
+    colors[i][0] = random(90);
+    colors[i][1] = random(90, 255);
+    colors[i][2] = random(100, 255);
+  }
+
+  targetColor = color(colors[colorIndex][0],
+    colors[colorIndex][1], colors[colorIndex][2]);
+  currentColor = targetColor;
 }
 
 function draw() {
+  currentColor = lerpColor(currentColor, targetColor, 0.01);
   background(51);
   // if a stack has been filled & a new shape obj created, show it
   if (shapes.length > 0){
     for (let i = 0; i < shapes.length; i++){
       shapes[i].show();
+      shapes[i].colorUpdate();
     }
   }
 
@@ -65,6 +84,21 @@ function draw() {
       }
     }
   }
+
+  // Updating current and projected color values
+  if (frameCount % 25 === 0) {
+    colorIndex = (colorIndex + 1) % colors.length;
+    targetColor = color(colors[colorIndex][0],
+        colors[colorIndex][1], colors[colorIndex][2]);
+}
+  // Resetting color values every 150 frames 
+  if (frameCount % 150 === 0) {
+    for (let i = 0; i < colors.length; i++){
+      colors[i][0] = random(90);
+      colors[i][1] = random(90, 255);
+      colors[i][2] = random(100, 255);
+    }
+  }
 }
 
 function shapeify() {
@@ -75,36 +109,48 @@ function shapeify() {
   }
 
   // I'll be trying to figure out how to find the outer parameters of what's been visited here, to draw an outline. right now this does nothing and isn't called in draw()
-  this.showShape = function() {
-    stroke(0, 255, 0);
-    beginShape();
+  // this.showShape = function() {
+  //   stroke(0, 255, 0);
+  //   beginShape();
     
-    for (let i = 0; i < this.shapestack.length; i++) {
-      var x = this.shapestack[i].i * w;
-      var y = this.shapestack[i].j * w;
-      vertex(x, y);
-    }
-    for (let i = 0; i < this.shapestack.length; i++){
-      var x = (this.shapestack[i].i * w) - w;
-      var y = (this.shapestack[i].j * w) - w;
-      vertex(x,y);
-    }
-    endShape();
+  //   for (let i = 0; i < this.shapestack.length; i++) {
+  //     var x = this.shapestack[i].i * w;
+  //     var y = this.shapestack[i].j * w;
+  //     vertex(x, y);
+  //   }
+  //   for (let i = 0; i < this.shapestack.length; i++){
+  //     var x = (this.shapestack[i].i * w) - w;
+  //     var y = (this.shapestack[i].j * w) - w;
+  //     vertex(x,y);
+  //   }
+  //   endShape();
     
-  }
+  // }
 
   // Set a random radius for the circles on a by-object basis to give variation, with a max of the width of the grid
   this.r = random(2, w);
+  this.cI = floor(random(0, colors.length));
+  this.objectTarget = currentColor;
+  this.objectCurrent = targetColor;
 
   // draw a circle in the center of the square for each index in shapestack
   this.show = function(){
     noStroke();
-    fill(0, 255, 0);
+    fill(this.objectCurrent);
     for (i = 0; i < this.shapestack.length; i++){
       var x = this.shapestack[i].i * w;
       var y = this.shapestack[i].j * w;
       circle(x + (w/2), y + (w/2), this.r);
     }
+  }
+
+  this.colorUpdate = function(){
+    this.objectCurrent = lerpColor(this.objectCurrent, this.objectTarget, 0.009);
+    if (frameCount % 25 === 0) {
+      this.cI = (this.cI + 1) % colors.length;
+      this.objectTarget = color(colors[this.cI][0],
+          colors[this.cI][1], colors[this.cI][2]);
+  }
   }
 }
 
