@@ -1,6 +1,6 @@
 // defining grid agent moves through
 let cols, rows;
-let w = 8;
+let w = 16;
 let grid = [];
 // list of locations finder agent has moved through
 let stack = [];
