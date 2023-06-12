@@ -1,6 +1,6 @@
 // defining grid agent moves through
 let cols, rows;
-let w = 15;
+let w = 8;
 let grid = [];
 // list of locations finder agent has moved through
 let stack = [];
@@ -93,8 +93,8 @@ function shapeify() {
     
   }
 
-  // Set a random radius for the circles on a by-object basis to give variation
-  this.r = random(2, 15);
+  // Set a random radius for the circles on a by-object basis to give variation, with a max of the width of the grid
+  this.r = random(2, w);
 
   // draw a circle in the center of the square for each index in shapestack
   this.show = function(){
